@@ -6,8 +6,6 @@
 
 ## What you should change in code?
 
-####HTML code
-
 ```html
 you should change this part with your tv's local ip
 self.tv=kumanda.Kumanda("192.168.1.102")
