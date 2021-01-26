@@ -18,6 +18,7 @@ and run the window.py
 
 - Basic interface design 
 `<link>` : <https://github.com/canrollas/Remote-Controller/blob/main/WhatsApp%20Image%202021-01-26%20at%2023.14.35.jpeg>
+
 - Code integrated the main as file named window
-<link>` : <https://github.com/canrollas/Remote-Controller/blob/main/WhatsApp%20Image%202021-01-26%20at%2023.14.15.jpeg>
+`<link>` : <https://github.com/canrollas/Remote-Controller/blob/main/WhatsApp%20Image%202021-01-26%20at%2023.14.15.jpeg>
 
