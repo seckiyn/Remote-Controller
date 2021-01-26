@@ -1,3 +1,10 @@
+[TOCM]
+
+[TOC]
+
+#H1 header
+##H2 header
+
 # Features
 - It is basic remote controller for grundig smart tv coded with python
 - It based on 39 diffrent commands
@@ -14,7 +21,7 @@ and run the window.py
 
 ### How it's look
 
--Basic interface design 
+- Basic interface design 
 
 ![](https://github.com/canrollas/Remote-Controller/blob/main/WhatsApp%20Image%202021-01-26%20at%2023.14.35.jpeg)
 
