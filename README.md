@@ -7,8 +7,8 @@
 
 -Basic interface design 
 
-![](WhatsApp Image 2021-01-26 at 23.14.35.jpeg)
+![](https://github.com/canrollas/Remote-Controller/blob/main/WhatsApp%20Image%202021-01-26%20at%2023.14.35.jpeg)
 
 - Code integrated the main as file named window
 
-![](WhatsApp Image 2021-01-26 at 23.14.15.jpeg)
+![](https://github.com/canrollas/Remote-Controller/blob/main/WhatsApp%20Image%202021-01-26%20at%2023.14.15.jpeg)
