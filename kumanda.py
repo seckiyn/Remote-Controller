@@ -9,8 +9,8 @@ class Kumanda:
         volume_down = "-2476:-4019"
         channel_up = "-2464:-4026"
         channel_down = "-2465:-4025"
-        menü= "-2547:-4078"
-        exit= "-2534:-3998"
+        menu= "-2547:-4078"
+        exitt= "-2534:-3998"
         back= "-2542:-3979"
         left= "-2495:-4096"
         right= "-2494:-4095"
@@ -38,7 +38,7 @@ class Kumanda:
         stop= "-2545:-4014"
         prev= "-2538:-4005"
         forward= "-2555:-4023"
-        next="-2546:4004"
+        nextt="-2546:4004"
         language= "-2549:-3984"
         subtitle="-2507:4064"
         red="-2523:4030"
@@ -78,10 +78,10 @@ class Kumanda:
         return self.send_key_command(self.kumanda_keycode.channel_up)
     def channel_down(self):
         return self.send_key_command(self.kumanda_keycode.channel_down)
-    def menü(self):
-        return self.send_key_command(self.kumanda_keycode.menü)
+    def menu(self):
+        return self.send_key_command(self.kumanda_keycode.menu)
     def exitt(self):
-        return self.send_key_command(self.kumanda_keycode.exit)
+        return self.send_key_command(self.kumanda_keycode.exitt)
     def back(self):
         return self.send_key_command(self.kumanda_keycode.back)
     def left(self):
@@ -137,7 +137,7 @@ class Kumanda:
     def forward(self):
         return self.send_key_command(self.kumanda_keycode.forward)
     def next(self):
-        return self.send_key_command(self.kumanda_keycode.next)
+        return self.send_key_command(self.kumanda_keycode.nextt)
     def language(self):
         return self.send_key_command(self.kumanda_keycode.language)
     def subtitle(self):
@@ -150,47 +150,5 @@ class Kumanda:
         return self.send_key_command(self.kumanda_keycode.yellow)
     def blue(self):
         return self.send_key_command(self.kumanda_keycode.blue)
-tv=Kumanda("192.168.1.102")
-while(True):
-    print("""
-        CHOICE LIST******
-        -------------------
-        power             
-        mute 
-        volume_up
-        volume_down
-        channel_up
-        channel_down
-        exit
-        zero
-        one
-        two
-        three
-        four
-        five
-        six
-        seven
-        eight
-        nine
-        rec
-        play
-        pause
-        stop
-        prev
-        forward
-        next
-        language
-        subtitle
-        red
-        green
-        yellow
-        blue
-        quit
-        """)
-    choice=input("Your Choice:")
-    if(choice=="quit"):
-        break
-    else:
-        eval("tv"+"."+choice+"()")
-    
+
 
