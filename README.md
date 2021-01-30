@@ -21,6 +21,7 @@ and run the window.py
 
 - Code integrated the main as file named window
 `<link>` : <https://github.com/canrollas/Remote-Controller/blob/main/image-2.jpeg>
+- General look:
 `<link>` : <https://github.com/canrollas/Remote-Controller/blob/main/image-3.jpeg>
 
 ## Licence & copyright
