@@ -17,8 +17,15 @@ and run the window.py
 ### How it's look
 
 - Basic interface design 
-`<link>` : <https://github.com/canrollas/Remote-Controller/blob/main/WhatsApp%20Image%202021-01-26%20at%2023.14.35.jpeg>
+`<link>` : <https://github.com/canrollas/Remote-Controller/blob/main/image-1.jpeg>
 
 - Code integrated the main as file named window
-`<link>` : <https://github.com/canrollas/Remote-Controller/blob/main/WhatsApp%20Image%202021-01-26%20at%2023.14.15.jpeg>
+`<link>` : <https://github.com/canrollas/Remote-Controller/blob/main/image-2.jpeg>
+`<link>` : <https://github.com/canrollas/Remote-Controller/blob/main/image-3.jpeg>
+
+## Licence & copyright
+
+© Can Rollas , Grundig Desktop Remote Controller
+
+Lİcensed under the [Apache License](LICENSE).
 
