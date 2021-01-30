@@ -17,7 +17,7 @@ and run the window.py
 ### How it's look
 
 - Basic interface design 
-`<link>` : <https://github.com/canrollas/Remote-Controller/blob/main/image-1.jpeg>
+`<link>` : <https://github.com/canrollas/Remote-Controller/blob/main/image-1.png>
 
 - Code integrated the main as file named window
 `<link>` : <https://github.com/canrollas/Remote-Controller/blob/main/image-2.jpeg>
