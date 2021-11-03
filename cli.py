@@ -51,7 +51,7 @@ commandto = {
             'pause':remote.pause,
             'stop':remote.stop,
             'prevv':remote.prev,
-            'nextv':remote.nextt,
+            'nextv':remote.next,
             'lang':remote.language,
             'sub':remote.subtitle,
             'red':remote.red,
