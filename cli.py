@@ -1,127 +1,118 @@
+import sys
+import readline
+import netifaces
+import socket
+from collections import namedtuple
+from typing import List, Tuple
 from kumanda import *
 from time import sleep
-import sys
 
 remote = Kumanda('192.168.2.84')
 SLEEP_TIME = 1
 
-def helpme():
-    print('This is a help')
+class Cli:
+    def __init__(self, ip=None, port=8085):
+        self.kumanda_keycode: dict = self.get_keycode()
+        self.TIMEOUT = 0.01
+        self.ip = ip
+        self.port = port
+        if ip == None:
+            self.kumanda = self.connect_to_remote_auto()
+        else:
+            self.kumanda = self.connect_to_remote(ip, port)
+    def connect_to_remote(self, ip, port=8085):
+        return Kumanda(ip, port)
+    def connect_to_remote_auto(self) -> Kumanda:
+        ips = self.check_ports_local(8085)
+        if len(ips) != 1:
+            assert False, "More than one ip not implemented yet"
+        ip = ips[0]
+        self.ip = ip
+        kumanda = self.connect_to_remote(ip)
+        return kumanda
 
-def waitme(waittime=1): # Add to wait specific time without bloating command_list
-    pass
-    # sleep(waittime)
+    def check_ports_local(self, port=80) -> list:
+        open_port_list = list()
+        local = self.get_local()
+        *ip_range, spec = local.split(".")
+        non_ip = ".".join(ip_range)
+        for specific in range(256):
+            new_ip = f"{non_ip}.{specific}"
+            print("Checking:", new_ip)
+            result = self.is_port_in_use(new_ip, port)
+            print(f"Result: {result}")
+            if result:
+                open_port_list.append(new_ip)
+        return open_port_list
+    def is_port_in_use(self, ip: str, port: int) -> bool:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(self.TIMEOUT)
+            return s.connect_ex((ip, port)) == 0
+    def get_local(self) -> str:
+        iface = netifaces.gateways()["default"][netifaces.AF_INET][1]
+        ip = netifaces.ifaddresses(iface)[netifaces.AF_INET][0]["addr"]
+        return ip
 
-commandto = {
-            '1':remote.one,
-            '2':remote.two,
-            '3':remote.three,
-            '4':remote.four,
-            '5':remote.five,
-            '6':remote.six,
-            '7':remote.seven,
-            '8':remote.eight,
-            '9':remote.nine,
-            '0':remote.zero,
-            'power':remote.power_off,
-            'mute':remote.toggle_mute,
-            'volup':remote.volume_up,
-            'volume up':remote.volume_up,
-            'voldown':remote.volume_down,
-            'volume down':remote.volume_down,
-            'next':remote.channel_up,
-            'channel up':remote.channel_up,
-            'pre':remote.channel_down,
-            'channel down':remote.channel_down,
-            'menu':remote.menu,
-            'exit':remote.exitt,
-            'back':remote.back,
-            'left':remote.left,
-            'right':remote.right,
-            'top':remote.top,
-            'bottom':remote.bottom,
-            'ok':remote.ok,
-            'tools':remote.tools,
-            'source':remote.source,
-            'guide':remote.guide,
-            'fav':remote.fav,
-            'txt':remote.txt,
-            'rec':remote.rec,
-            'play':remote.play,
-            'pause':remote.pause,
-            'stop':remote.stop,
-            'prevv':remote.prev,
-            'nextv':remote.next,
-            'lang':remote.language,
-            'sub':remote.subtitle,
-            'red':remote.red,
-            'green':remote.green,
-            'yellow':remote.yellow,
-            'blue':remote.blue,
-            'help':helpme,
-            'quit':sys.exit,
-            'wait':waitme
-        }
+    def handle_input(self, inp: str) -> List[Tuple[str, str]]:
+        nested_input = inp.split(";")
+        Command = namedtuple("Command", ("name", "times"))
+        list_of_commands = list()
+        for command in nested_input:
+            # handle times
+            if ":" not in command:
+                command_name = command.strip()
+                command_times = 1
+            else:
+                command_name, command_times = map(str.strip, command.split(":"))
+                command_times = int(command_times)
 
-def handle_command(command):
-    '''
-        Will take a command and return a function
-    '''
-    if command in commandto: # Check if command exists
-        return commandto[command]
-    else:
-        print('There is no command named {}'.format(command))
-        return False
-def send_command(*commands):
-    for i in commands:
-        i()
-        sleep(SLEEP_TIME)
-def split_input(inp):
-    '''
-        will take str input like "next:3"
-        and will return next and 3
-    '''
-    times = 1
-    splitted_inp = inp.split(':')
-    if len(splitted_inp) == 2: # If input contains a times value
-        inp = splitted_inp[0]
-        if splitted_inp[1].isdigit():
-            times = int(splitted_inp[1])
-        return inp, times
-    elif len(splitted_inp) == 1: # If input is alone :(
-        return inp, 1
-    else: # If input is something else
-        print('Too much to split!!!')
-        return None,None
+            if self.handle_special_input(command_name): continue
+            if command_name not in self.kumanda_keycode: raise Exception(f"There's no command called {command_name}")
+            com = Command(command_name, command_times)
+            list_of_commands.append(com)
+        return list_of_commands
+    def handle_special_input(self, inp):
+        if inp == "quit":
+            if input("Do you want to quit?[y/n]: ") == "y":
+                sys.exit()
+            return True
+        if inp == "help":
+            print("Help")
+            return True
+        if inp == "keys":
+            print(list(self.kumanda_keycode.keys()))
+            return True
 
-def get_input():
-    command_list = []
-    while True:
-        nested_input = input('>>').split(';') # Get a list of inputs separated with semicolums "next:23;5;8"
-        for command in nested_input: # Iterate over command list
-            command, times = split_input(command) # Split and get command and how many times its gonna do
-            mcommand = handle_command(command) # Take commands and makes it into corresponding command
-            if mcommand: # Checks if its really a command
-                for _ in range(times):
-                    command_list.append(mcommand)
 
-        if command_list:
-            send_command(*command_list)
-            command_list = []
+    def handle_command(self, command):
+        '''
+            Will take a command and return a function
+        '''
+        print(command)
+        command, times = command
+        if command in kumanda_keycode:
+            for _ in range(times):
+                print(command)
+                self.kumanda.send_key_command_by_name(command)
+                sleep(SLEEP_TIME)
+
+    def start(self):
+        while True:
+            inp = input(f"{self.ip}:{self.port}>")
+            commands = self.handle_input(inp)
+            print(commands)
+            for command in commands:
+                mcommand = self.handle_command(command)
+    def get_keycode(self):
+        with open("./keycodes.json") as f:
+            return json.loads(f.read())
+
+
 
 
 if __name__ == '__main__':
-    get_input()
-
-
-
-
-
-
-
-
-
-
+    remote = Cli()
+    remote.start()
 
 
 
