@@ -141,7 +141,14 @@ class Cli:
         with open("./keycodes.json") as f:
             return json.loads(f.read())
 
-
+def print_help(script_name):
+    my_help = f"""\
+    {script_name} [OPTIONS]
+    --file <filename>: Use ip port from file or if --auto save it to file
+    --auto: Connect automatically
+    --ip <IP>: Use IP to connect remote
+    --port <PORT>: Use port to connect remote"""
+    print(my_help)
 
 def parse_args():
     script_name, *args = sys.argv
@@ -149,8 +156,10 @@ def parse_args():
     port = 8085
     file = None
     remote = None
-    args = ["--auto", "--ip", "192.168.1.1", "--filename", "ipport.md"]
 
+    if "--help" or not args:
+        print_help(script_name)
+        sys.exit()
     if "--auto" in args or "-a" in args:
         ip = None
     if "--ip" in args:
@@ -177,5 +186,5 @@ def parse_args():
 
 
 if __name__ == '__main__':
-    remote = parse_args()
+    remote: Cli = parse_args()
     remote.start()
