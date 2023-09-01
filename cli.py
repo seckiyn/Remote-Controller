@@ -1,4 +1,5 @@
 import sys
+import os
 import readline
 import netifaces
 import socket
@@ -11,25 +12,58 @@ remote = Kumanda('192.168.2.84')
 SLEEP_TIME = 1
 
 class Cli:
-    def __init__(self, ip=None, port=8085):
+    def __init__(self, ip=None, port=None, file=None):
+        if port == None: port = 8085
         self.kumanda_keycode: dict = self.get_keycode()
         self.TIMEOUT = 0.01
         self.ip = ip
         self.port = port
-        if ip == None:
+        self.file = file
+        if ip == None and not file:
             self.kumanda = self.connect_to_remote_auto()
+        elif file:
+            if not os.path.exists(file):
+                print("File doesn't exists")
+                self.kumanda = self.init_remote_and_save_to_file()
+            else:
+                with open(file) as f:
+                    ip_port = f.read()
+                    ip, port = ip_port.strip().split(":")
+                    port = int(port)
+                    self.ip = ip
+                    self.port = port
+                    self.kumanda = self.connect_to_remote(ip, port)
         else:
             self.kumanda = self.connect_to_remote(ip, port)
+    def __repr__(self):
+        string = "Kumanda("
+        string += "Ip: " + str(self.ip) + ", "
+        string += "Port: " + str(self.port) + ", "
+        string += "Filename: " + str(self.file)
+        string += ")"
+        return string
+
+
+    def init_remote_and_save_to_file(self):
+        kumanda, ip, port = self.connect_to_remote_auto()
+        with open(self.file, "w") as file:
+            file.write(f"{ip}:{port}")
+        return kumanda
+        
+
     def connect_to_remote(self, ip, port=8085):
         return Kumanda(ip, port)
     def connect_to_remote_auto(self) -> Kumanda:
-        ips = self.check_ports_local(8085)
+        ips = self.check_ports_local(self.port)
+        if not ips:
+            raise Exception("There are no machines found")
+            
         if len(ips) != 1:
             assert False, "More than one ip not implemented yet"
         ip = ips[0]
         self.ip = ip
         kumanda = self.connect_to_remote(ip)
-        return kumanda
+        return kumanda, ip, self.port
 
     def check_ports_local(self, port=80) -> list:
         open_port_list = list()
@@ -109,10 +143,39 @@ class Cli:
 
 
 
+def parse_args():
+    script_name, *args = sys.argv
+    ip = None
+    port = 8085
+    file = None
+    remote = None
+    args = ["--auto", "--ip", "192.168.1.1", "--filename", "ipport.md"]
+
+    if "--auto" in args or "-a" in args:
+        ip = None
+    if "--ip" in args:
+        pos = args.index("--ip")
+        pos += 1
+        ip = args[pos]
+    if "--port" in args:
+        pos = args.index("--port")
+        pos += 1
+        port = int(args[pos])
+    if "--file" in args:
+        pos = args.index("--file")
+        pos += 1
+        file = args[pos]
+    if "--filename" in args:
+        pos = args.index("--filename")
+        pos += 1
+        file = args[pos]
+
+    kumanda = Cli(ip, port, file)
+    print(kumanda)
+    return kumanda
+
+
 
 if __name__ == '__main__':
-    remote = Cli()
+    remote = parse_args()
     remote.start()
-
-
-
