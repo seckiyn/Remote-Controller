@@ -1,11 +1,17 @@
 import requests
 import json
+import os
 TIMEOUT = 10
 
 
 kumanda_keycode: dict = None
 
-with open("./keycodes.json") as f:
+PATH = os.path.dirname(os.path.abspath(__file__))
+def path(*filename):
+    return os.path.join(PATH, *filename)
+
+
+with open(path("keycodes.json")) as f:
     kumanda_keycode = json.loads(f.read())
 
 

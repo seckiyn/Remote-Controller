@@ -8,6 +8,10 @@ from typing import List, Tuple
 from kumanda import *
 from time import sleep
 
+PATH = os.path.dirname(os.path.abspath(__file__))
+def path(*filename):
+    return os.path.join(PATH, *filename)
+
 remote = Kumanda('192.168.2.84')
 SLEEP_TIME = 1
 
@@ -20,13 +24,13 @@ class Cli:
         self.port = port
         self.file = file
         if ip == None and not file:
-            self.kumanda = self.connect_to_remote_auto()
+            self.kumanda, ip, port = self.connect_to_remote_auto()
         elif file:
-            if not os.path.exists(file):
+            if not os.path.exists(path(file)):
                 print("File doesn't exists")
                 self.kumanda = self.init_remote_and_save_to_file()
             else:
-                with open(file) as f:
+                with open(path(file)) as f:
                     ip_port = f.read()
                     ip, port = ip_port.strip().split(":")
                     port = int(port)
@@ -46,7 +50,7 @@ class Cli:
 
     def init_remote_and_save_to_file(self):
         kumanda, ip, port = self.connect_to_remote_auto()
-        with open(self.file, "w") as file:
+        with open(path(self.file), "w") as file:
             file.write(f"{ip}:{port}")
         return kumanda
         
@@ -138,7 +142,8 @@ class Cli:
             for command in commands:
                 mcommand = self.handle_command(command)
     def get_keycode(self):
-        with open("./keycodes.json") as f:
+        print(path("keycodes.json"))
+        with open(path("keycodes.json")) as f:
             return json.loads(f.read())
 
 def print_help(script_name):
@@ -157,7 +162,7 @@ def parse_args():
     file = None
     remote = None
 
-    if "--help" or not args:
+    if "--help" in args or not args:
         print_help(script_name)
         sys.exit()
     if "--auto" in args or "-a" in args:
