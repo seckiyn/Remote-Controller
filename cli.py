@@ -3,12 +3,21 @@ import os
 import readline
 import netifaces
 import socket
+import atexit
 from collections import namedtuple
 from typing import List, Tuple
 from kumanda import *
 from time import sleep
 
+"""TODO:
+    - Add a way to execute commands like !<COMMAND> [ARGS]*
+        - ADD HELP
+        - ADD SAVE MACRO
+        - ADD REMOVE HISTORY
+        - ADD NOT TO SAVE IT TO HISTORY
+"""
 PATH = os.path.dirname(os.path.abspath(__file__))
+HISTORY_PATH = path(".history")
 def path(*filename):
     return os.path.join(PATH, *filename)
 
@@ -155,6 +164,35 @@ def print_help(script_name):
     --port <PORT>: Use port to connect remote"""
     print(my_help)
 
+
+class ReadLine:
+    def __init__(self):
+        self.length = None
+        self.history_path = HISTORY_PATH
+        self.init_readline()
+
+    def init_readline(self):
+        print("Initializing history")
+        if os.path.exists(self.history_path):
+            readline.read_history_file(self.history_path)
+            self.length = readline.get_current_history_length()
+        else:
+            open(self.history_path, "wb").close()
+            self.length = 0
+        atexit.register(self.save)
+    def debug(self):
+        print(f"{self.history_path=}\n{self.length=}")
+        while inp:=input("deneme: "): print("History?: ", inp)
+    def save(self):
+        new_h_len = readline.get_history_length()
+        readline.set_history_length(1000)
+        readline.write_history_file(self.history_path)
+    def get_last(self):
+        self.save()
+        item = open(self.history_path).readlines()[-1]
+        return item
+
+
 def parse_args():
     script_name, *args = sys.argv
     ip = None
@@ -191,5 +229,8 @@ def parse_args():
 
 
 if __name__ == '__main__':
+    readLine = ReadLine()
+    atexit.register(readLine.save)
+    # readLine.debug()
     remote: Cli = parse_args()
     remote.start()
