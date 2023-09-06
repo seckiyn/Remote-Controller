@@ -8,6 +8,8 @@ from collections import namedtuple
 from typing import List, Tuple
 from kumanda import *
 from time import sleep
+from os.path import join
+
 
 """TODO:
     - Add a way to execute commands like !<COMMAND> [ARGS]*
@@ -17,6 +19,7 @@ from time import sleep
         - ADD NOT TO SAVE IT TO HISTORY
 """
 PATH = os.path.dirname(os.path.abspath(__file__))
+MACROFILE = path(".macros")
 HISTORY_PATH = path(".history")
 def path(*filename):
     return os.path.join(PATH, *filename)
@@ -25,7 +28,8 @@ remote = Kumanda('192.168.2.84')
 SLEEP_TIME = 1
 
 class Cli:
-    def __init__(self, ip=None, port=None, file=None):
+    def __init__(self, ip=None, port=None, file=None, rl=None):
+        self.rl = rl
         if port == None: port = 8085
         self.kumanda_keycode: dict = self.get_keycode()
         self.TIMEOUT = 0.01
@@ -119,9 +123,14 @@ class Cli:
             list_of_commands.append(com)
         return list_of_commands
     def handle_special_input(self, inp):
+        if inp == "exit":
+            print("If you want to use `exit` key use `exitt`\n" +
+                   "if you want to exit from program use `quit` or `!exit`")
+            return True
         if inp == "quit":
-            if input("Do you want to quit?[y/n]: ") == "y":
-                sys.exit()
+            sys.exit()
+        if inp == "!exit":
+            sys.exit()
             return True
         if inp == "help":
             print("Help")
@@ -129,17 +138,91 @@ class Cli:
         if inp == "keys":
             print(list(self.kumanda_keycode.keys()))
             return True
+        # inputs with arguments
+        splitted_inp = inp.split()
+        if len(splitted_inp) == 1:
+            return False
+
+        if "addmacro" in splitted_inp:
+            name, *args = splitted_inp
+            return self.addmacro(args)
+
+        if "macro" in splitted_inp:
+            name, *args = splitted_inp
+            return self.macro(args)
+
+        if "wait" in splitted_inp:
+            name, *args = splitted_inp
+            return self.wait(args)
+    def wait(self, args):
+        to_wait = int(args[0])
+        print("Waiting {} seconds".format(to_wait))
+        sleep(to_wait)
+        return True
+
+
+    def check_macro(self, macro_name):
+        to_check = list()
+        with open(MACROFILE) as file:
+            for line in file.readlines():
+                macron = line.split("{")[0].strip()
+                to_check.append(macron)
+        # print(to_check)
+
+        return macro_name in to_check
+
+
+
+    def macro(self, args):
+        macro_name = args[0]
+        my_macro = None
+        with open(MACROFILE) as file:
+            for line in file.readlines():
+                # print(line)
+                if line.startswith(macro_name):
+                    splitted_macro = line.split("{")
+                    raw_macro = splitted_macro[1]
+                    my_macro = raw_macro.strip()
+                    my_macro = my_macro[:-1]
+                    # print(my_macro)
+
+        if not my_macro:
+            print(f"Can't find the macro {macro_name}")
+        self.handle_input(my_macro)
+
+        return True
+
+    def addmacro(self, args):
+        if len(args) != 1:
+            print("Exhaustive arguments for macro", "addmacro <macroname>")
+            return True
+        macro_name = args[0]
+        print(f"{macro_name=}")
+        with open(MACROFILE, "a") as file:
+            """
+            last = get_last_from_history()
+            """
+            last = self.rl.get_last()
+            print("Last: ", last)
+            if self.check_macro(macro_name):
+                print(f"{macro_name} already added")
+                return True
+            to_write = macro_name + "{" + str(last.strip()) + "}"
+            file.write(to_write+"\n")
+        return True
+
+
 
 
     def handle_command(self, command):
         '''
             Will take a command and return a function
         '''
-        print(command)
+        # print(command)
         command, times = command
         if command in kumanda_keycode:
             for _ in range(times):
-                print(command)
+                # print(command)
                 self.kumanda.send_key_command_by_name(command)
                 sleep(SLEEP_TIME)
 
@@ -147,11 +230,11 @@ class Cli:
         while True:
             inp = input(f"{self.ip}:{self.port}>")
             commands = self.handle_input(inp)
-            print(commands)
+            # print(commands)
             for command in commands:
                 mcommand = self.handle_command(command)
     def get_keycode(self):
-        print(path("keycodes.json"))
+        # print(path("keycodes.json"))
         with open(path("keycodes.json")) as f:
             return json.loads(f.read())
 
@@ -189,11 +272,11 @@ class ReadLine:
         readline.write_history_file(self.history_path)
     def get_last(self):
         self.save()
-        item = open(self.history_path).readlines()[-1]
+        item = open(self.history_path).readlines()[-2]
         return item
 
 
-def parse_args():
+def parse_args(rl=None):
     script_name, *args = sys.argv
     ip = None
     port = 8085
@@ -222,7 +305,7 @@ def parse_args():
         pos += 1
         file = args[pos]
 
-    kumanda = Cli(ip, port, file)
+    kumanda = Cli(ip, port, file, rl=rl)
     print(kumanda)
     return kumanda
 
@@ -232,5 +315,5 @@ if __name__ == '__main__':
     readLine = ReadLine()
     atexit.register(readLine.save)
     # readLine.debug()
-    remote: Cli = parse_args()
+    remote: Cli = parse_args(readLine)
     remote.start()
